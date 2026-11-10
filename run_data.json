@@ -1,0 +1,7 @@
+{
+  "network": "BSC Testnet",
+  "chainId": 97,
+  "victimAddress": "0xcB1dbfcDe253c9f969DBA3E039AeCA094461e8F5",
+  "blockStart": 141854284,
+  "blockEnd": 141854300
+}
