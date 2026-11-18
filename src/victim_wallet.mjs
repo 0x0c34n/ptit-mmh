@@ -105,7 +105,7 @@ async function main() {
 
     const txHash = await client.sendRawTransaction({ serializedTransaction: signed.rawSignedTx });
     console.log(`    -> TxHash: ${txHash}`);
-    console.log(`    -> Đang chờ thợ đào đóng khối BSC...`);
+    console.log(`    -> Đang chờ Validator đóng khối BSC...`);
 
     const receipt = await client.waitForTransactionReceipt({ hash: txHash });
     const blockNum = Number(receipt.blockNumber);

@@ -15,11 +15,12 @@ poc/
 └── src/
     ├── config.mjs             # Cấu hình mạng BSC Testnet & Ví nạn nhân
     ├── math.mjs               # Giải thuật Euclid mở rộng & Nghịch đảo Modulo (Native BigInt)
-    ├── signer.mjs             # Module tuần tự hóa giao dịch EVM & Ký số chuẩn EIP-155 / EIP-2
+    ├── signer.mjs             # Module ký số giao dịch EVM (EIP-155) & Thông điệp ngoài chuỗi (EIP-191)
     ├── exploit.mjs            # Lõi thám mã đại số khôi phục Private Key từ 2 chữ ký va chạm r
     ├── check_balance.mjs      # Kiểm tra số dư tBNB trên chuỗi thật
     ├── victim_wallet.mjs      # Kịch bản 1: Ví nạn nhân gửi chuỗi giao dịch on-chain thật
-    └── scanner_exploit.mjs    # Kịch bản 2: Scanner Bot quét block, tự decode dữ liệu & thám mã
+    ├── scanner_exploit.mjs    # Kịch bản 2: Scanner Bot quét block, tự decode dữ liệu & thám mã
+    └── demo_cross_collision.mjs # Kịch bản 3: Va chạm Nonce chéo giữa chữ ký dApp Web3 và giao dịch BSC
 ```
 
 ---
@@ -44,13 +45,19 @@ Ví demo đã được cấp sẵn tBNB để chi trả phí gas trên BSC Testn
 ```bash
 node src/victim_wallet.mjs
 ```
-Chương trình ký và gửi chuỗi giao dịch thật lên BSC Testnet. Lỗi tái sử dụng Nonce xảy ra tại Tx #2 và Tx #4. Các giao dịch được thợ đào đóng vào các Block thật trên mạng lưới. Sau khi hoàn tất, file `run_data.json` chỉ lưu phạm vi khối `[blockStart, blockEnd]`, hoàn toàn không lưu dữ liệu giao dịch hay chữ ký nào.
+Chương trình ký và gửi chuỗi giao dịch thật lên BSC Testnet. Lỗi tái sử dụng Nonce xảy ra tại Tx #2 và Tx #4. Các giao dịch được các Validator xác nhận và đóng vào các Block thật trên mạng lưới. Sau khi hoàn tất, file `run_data.json` chỉ lưu phạm vi khối `[blockStart, blockEnd]`, hoàn toàn không lưu dữ liệu giao dịch hay chữ ký nào.
 
 ### Bước 4: Chạy Kịch bản 2 — On-chain Scanner Bot (Quét khối, Decode & Thám mã)
 ```bash
 node src/scanner_exploit.mjs
 ```
 Scanner Bot hoạt động như một crawler độc lập: Gọi RPC kéo từng block từ mạng BSC Testnet, tự động giải mã cấu trúc giao dịch trong block, lọc theo địa chỉ ví mục tiêu, bóc tách chữ ký $(r, s, v)$ và tính digest $e = H(m)$. Khi phát hiện va chạm $r$ tại Tx #4 (Block #141854299) trùng với Tx #2 (Block #141854287), bot kích hoạt giải thuật Euclid mở rộng và khôi phục chính xác 100% Private Key trong $< 0.3$ mili-giây.
+
+### Bước 5: Chạy Kịch bản 3 — Va chạm Nonce chéo (Off-chain EIP-191 & On-chain BSC)
+```bash
+node src/demo_cross_collision.mjs
+```
+Kịch bản mô phỏng tình huống người dùng ký thông điệp đăng nhập Cổng thông tin dApp (Off-chain EIP-191) và một giao dịch chuyển tiền trên BSC Testnet (On-chain EIP-155). Lỗi PRNG khiến cả hai thao tác dùng chung $k$. Hacker thu thập 2 chữ ký từ Web API và Blockchain, dùng giải thuật Euclid mở rộng khôi phục thành công khóa bí mật trong $< 0.2$ mili-giây.
 
 ---
 
